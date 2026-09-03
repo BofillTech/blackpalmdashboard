@@ -195,6 +195,50 @@ tr.rowlink:hover td{background:var(--bg2)}
 .cybergrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .notice{background:rgba(201,169,106,.06);border:1px dashed var(--brass-dim);border-radius:8px;padding:12px 16px;font-size:12.5px;color:var(--t2);margin-bottom:14px}
 .notice b{color:var(--brass);font-weight:600}
+
+/* decision strip */
+.decision{display:grid;grid-template-columns:1fr 1.3fr;background:var(--bg1);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+.decision .pside{padding:18px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.plabel{font-size:11.5px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+.posture-big{font-size:25px;font-weight:700;letter-spacing:.03em}
+.posture-big.guarded{color:var(--brass)}.posture-big.elevated{color:var(--amber)}.posture-big.critical{color:var(--red)}
+.decision .why{font-size:13px;color:var(--t2);line-height:1.55}
+.decision .aside{padding:12px 20px 14px}
+.att{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.att:last-child{border-bottom:none}
+.att .at{font-size:13px;flex:1;min-width:170px}
+.att .sevdot{width:7px;height:7px;border-radius:50%;flex:none}
+.att .btns{display:flex;gap:6px;flex-wrap:wrap}
+.att .btns button{font-size:11.5px;padding:4px 10px;border-radius:12px;border:1px solid var(--line2);color:var(--t2);transition:all .12s}
+.att .btns button:hover{border-color:var(--brass-dim);color:var(--brass)}
+.briefcard{border-left:3px solid var(--brass)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;justify-content:center}
+.chips button{font-size:11.5px;padding:5px 11px;border-radius:14px;border:1px solid var(--line2);color:var(--t2);transition:all .12s}
+.chips button:hover{border-color:var(--brass-dim);color:var(--brass)}
+.askbtn{border:1px solid var(--brass-dim)}
+.hb{display:none;width:36px;height:36px;border-radius:6px;background:var(--bg3);align-items:center;justify-content:center;flex:none}
+.railveil{display:none}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:266px;z-index:46;transform:translateX(-105%);transition:transform .25s}
+  .rail.open{transform:none}
+  .railveil.on{display:block;position:fixed;inset:0;background:rgba(8,10,9,.6);z-index:45}
+  .hb{display:flex}
+  .clock{display:none}
+  .topbar{gap:10px;padding:0 12px;height:auto;min-height:56px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+  .topbar h1{font-size:14px}
+  .posture .lbl{display:none}
+  .content{padding:12px}
+  .tiles{grid-template-columns:repeat(2,1fr);gap:10px}
+  .decision{grid-template-columns:1fr}
+  .decision .pside{border-right:none;border-bottom:1px solid var(--line)}
+  .home-grid{grid-template-columns:1fr !important}
+  .camgrid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .drawer{width:100vw}
+  .kpis{grid-template-columns:1fr}
+  .cybergrid{grid-template-columns:1fr}
+}
 ::-webkit-scrollbar{width:9px;height:9px}
 ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -225,6 +269,7 @@ tr.rowlink:hover td{background:var(--bg2)}
   <!-- ============ MAIN ============ -->
   <div class="main">
     <div class="topbar">
+      <button class="hb" onclick="toggleRail()" aria-label="Open menu"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       <div>
         <h1 id="screenTitle">Command Center</h1>
         <div class="org">Sterling Financial Group · 5 facilities</div>
@@ -243,6 +288,8 @@ tr.rowlink:hover td{background:var(--bg2)}
   </div>
 </div>
 
+<div class="railveil" id="railveil" onclick="toggleRail(false)"></div>
+
 <!-- ============ ASK BLACK PALM DRAWER ============ -->
 <div class="drawer" id="drawer" role="complementary" aria-label="Ask Black Palm assistant">
   <div class="drawer-h">
@@ -252,7 +299,15 @@ tr.rowlink:hover td{background:var(--bg2)}
     <button onclick="toggleDrawer(false)" aria-label="Close assistant" style="color:var(--t3);font-size:16px">✕</button>
   </div>
   <div class="chat" id="chat">
-    <div class="msg sys">Ask about live conditions, procedures, or facilities.<br>Try: "Brief me on everything happening right now."</div>
+    <div class="msg sys">Grounded in your knowledge library and live operational data.
+      <div class="chips">
+        <button onclick="seedChat('Brief me on everything that happened overnight.')">Overnight brief</button>
+        <button onclick="seedChat('Why is our posture what it is right now?')">Why this posture?</button>
+        <button onclick="seedChat('What requires my attention?')">What needs attention?</button>
+        <button onclick="seedChat('Pull our armed visitor SOP.')">Pull an SOP</button>
+        <button onclick="seedChat('Summarize the Miami incident for the COO.')">Summarize for COO</button>
+      </div>
+    </div>
   </div>
   <div class="chatin">
     <input id="chatInput" placeholder="Ask about incidents, SOPs, facilities…" onkeydown="if(event.key==='Enter')sendChat()">
@@ -318,7 +373,26 @@ const S = {
     {id:'NYC-ROOF-1', l:'NYC HQ · Roof access'},
   ],
   alertQueue:null, ackTimer:null,
+  postureReason:'Perimeter activity under review at Miami Data Center and a tropical storm watch covering both Florida facilities.',
+  audit:[
+    {t:'07:10', u:'J. Okafor', a:'Closed field response — Miami DC perimeter (no breach confirmed)'},
+    {t:'06:44', u:'J. Okafor', a:'Opened incident INC-0142 — Miami DC perimeter review'},
+    {t:'Yesterday 16:20', u:'D. Marsh', a:'Sent AlertMedia notification — severe weather advisory (312 recipients)'},
+  ],
 };
+
+/* Customer knowledge library — Ask Black Palm cites these by name */
+const KDOCS=[
+  ['SOP-7 · Armed visitor / visible weapon response','SOP','Enterprise','v3.1 · Jun 2026','Current'],
+  ['SOP-9 · Demonstrations near facility','SOP','Enterprise','v2.0 · Mar 2026','Current'],
+  ['SOP-11 · Severe weather (tropical) readiness','SOP','Florida sites','v4.2 · Aug 2026','Current'],
+  ['Miami DC perimeter intrusion playbook','Playbook','Miami Data Center','v1.3 · Jul 2026','Current'],
+  ['NYC HQ Emergency Action Plan','EAP','New York HQ','v5.0 · Jan 2026','Review due'],
+  ['Crisis communications plan','Policy','Enterprise','v2.1 · May 2026','Current'],
+  ['Escalation and contact list — enterprise','Contacts','Enterprise','Aug 2026','Current'],
+  ['Lobby post orders — all sites','Post orders','Enterprise','v3.0 · Apr 2026','Current'],
+  ['After-action: severe weather activation','After-action','Florida sites','Aug 22','Complete'],
+];
 
 const SOPS = {
   'armed-visitor':`SOP-7 Armed visitor / visible weapon response (v3.1)
@@ -343,12 +417,14 @@ const SOPS = {
 const NAV = [
   ['home','Command Center', 'M3 12l9-8 9 8M5 10v10h5v-6h4v6h5V10'],
   ['intel','Intelligence', 'M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c3 3 3 17 0 20c-3-3-3-17 0-20'],
-  ['map','Operating picture', 'M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14'],
+  ['map','Common operating picture', 'M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14'],
   ['incidents','Incidents', 'M12 2L2 20h20L12 2zM12 9v5M12 17.5v.5'],
   ['video','Video', 'M2 6h13v12H2zM15 10l7-4v12l-7-4'],
   ['comms','Communications', 'M4 4h16v11H8l-4 4V4zM8 8h8M8 11h5'],
+  ['knowledge','Knowledge library','M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z'],
   ['cyber','Cyber', 'M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z'],
   ['reports','Reports', 'M4 20V9M10 20V4M16 20v-7M22 20H2'],
+  ['admin','Administration','M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75'],
 ];
 
 /* ================= RENDER HELPERS ================= */
@@ -366,10 +442,18 @@ function renderNav(){
   }).join('');
 }
 
-function go(k){S.screen=k; renderNav(); renderScreen();}
+function go(k){S.screen=k; renderNav(); renderScreen(); if(window.innerWidth<=860)toggleRail(false);}
 
-function setPosture(p){
+function toggleRail(force){
+  const r=document.querySelector('.rail');
+  const open=(force===undefined)?!r.classList.contains('open'):force;
+  r.classList.toggle('open',open);
+  $('railveil').classList.toggle('on',open);
+}
+
+function setPosture(p,reason){
   S.posture=p;
+  if(reason)S.postureReason=reason;
   const c=$('postureChip');
   c.className='chip '+p;
   c.textContent=p[0].toUpperCase()+p.slice(1);
@@ -396,22 +480,56 @@ function evtRows(list){
 /* ================= SCREENS ================= */
 function renderScreen(){
   const c=$('content');
-  const titles={home:'Command Center',intel:'Intelligence',map:'Common operating picture',incidents:'Incidents',video:'Video intelligence',comms:'Communications',cyber:'Cyber risk',reports:'Executive reporting'};
+  const titles={home:'Command Center',intel:'Intelligence',map:'Common operating picture',incidents:'Incidents',video:'Video intelligence',comms:'Communications',cyber:'Cyber risk',reports:'Executive reporting',knowledge:'Knowledge library',admin:'Administration'};
   $('screenTitle').textContent=titles[S.screen];
-  c.innerHTML = ({home,intel,map,incidents,video,comms,cyber,reports})[S.screen]();
+  c.innerHTML = ({home,intel,map,incidents,video,comms,cyber,reports,knowledge,admin})[S.screen]();
   if(S.screen==='home') drawSpark('spark1');
   if(S.screen==='reports'){drawSpark('spark2');drawSpark('spark3',true)}
 }
 
 function home(){
   const activeInc=S.incidents.filter(i=>i.status==='Active').length;
-  const openTasks=S.tasks.length;
   const lastComm=S.comms[0];
+  const att = S.scenarioRun ? [
+    {c:'var(--red)', t:'Weapon detection response — NYC HQ lobby (INC-0143)', b:[['Review incident',"go('incidents')"],['Open cameras',"go('video')"],['View SOP-7',"toggleDrawer(true);seedChat('Pull our armed visitor SOP.')"]]},
+    {c:'var(--amber)', t:'Review Miami perimeter event (INC-0142)', b:[['Review incident',"go('incidents')"]]},
+    {c:'var(--amber)', t:'Confirm Florida weather readiness — SOP-11 checks due', b:[['View playbook',"go('knowledge')"],['Draft notification',"openComposer()"]]},
+  ] : [
+    {c:'var(--amber)', t:'Review Miami perimeter event (INC-0142)', b:[['Review incident',"go('incidents')"],['Open cameras',"go('video')"]]},
+    {c:'var(--amber)', t:'Confirm Florida weather readiness — SOP-11 checks due', b:[['View playbook',"go('knowledge')"],['Draft notification',"openComposer()"]]},
+    {c:'var(--t3)', t:'Complete overdue task — Q3 access badge audit', b:[['View tasks',"go('incidents')"]]},
+  ];
   return `
+  <div class="decision">
+    <div class="pside">
+      <span class="plabel">Enterprise posture</span>
+      <span class="posture-big ${S.posture}">${S.posture.toUpperCase()}</span>
+      <span class="why">${S.postureReason}</span>
+      <div><button class="btn sm" onclick="toggleDrawer(true);seedChat('Why is our posture what it is right now?')">Ask Black Palm why</button></div>
+    </div>
+    <div class="aside">
+      <div class="plabel" style="margin-bottom:2px">Recommended attention</div>
+      ${att.map(a=>`<div class="att"><span class="sevdot" style="background:${a.c}"></span><span class="at">${a.t}</span><span class="btns">${a.b.map(x=>`<button onclick="${x[1]}">${x[0]}</button>`).join('')}</span></div>`).join('')}
+    </div>
+  </div>
+
+  <div class="card briefcard" style="margin-bottom:14px">
+    <div class="card-h">${ico('M12 3v2M5.6 5.6l1.4 1.4M3 12h2M12 21a7 7 0 007-7H5a7 7 0 007 7zM18.4 5.6L17 7M21 12h-2')}Today's security brief<span style="color:var(--t3);font-size:11.5px;margin-left:6px">synthesized from incidents · intel · weather · comms · tasks</span></div>
+    <div class="card-b" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+      <ul class="brief" style="flex:1;min-width:260px">
+        ${S.scenarioRun?'<li><b style="color:var(--red);font-weight:600">New York HQ</b>&nbsp;— weapon detection response in progress (INC-0143). SOP-7 active.</li>':''}
+        <li><b style="color:var(--brass);font-weight:600">Miami Data Center</b>&nbsp;— perimeter event detected 06:42, resolved as no-breach; camera realignment pending.</li>
+        <li><b style="color:var(--brass);font-weight:600">Florida sites</b>&nbsp;— tropical storm watch in effect; SOP-11 readiness checks due within 24h.</li>
+        <li><b style="color:var(--brass);font-weight:600">Enterprise</b>&nbsp;— one corrective action from yesterday remains overdue.</li>
+      </ul>
+      <button class="btn primary sm" onclick="toggleDrawer(true);seedChat('Give me my full morning security briefing.')">Ask Black Palm for full briefing</button>
+    </div>
+  </div>
+
   <div class="tiles">
-    <div class="tile"><div class="k">Facilities online</div><div class="v good num">5<span style="font-size:15px;color:var(--t3)">/5</span></div><div class="d">1 in weather advisory area</div></div>
+    <div class="tile"><div class="k">Facilities online</div><div class="v good num">5<span style="font-size:15px;color:var(--t3)">/5</span></div><div class="d">2 in weather advisory area</div></div>
     <div class="tile"><div class="k">Active incidents</div><div class="v ${activeInc>1?'bad':'warn'} num">${activeInc}</div><div class="d">${S.scenarioRun?'1 critical, 1 under review':'perimeter review, Miami DC'}</div></div>
-    <div class="tile"><div class="k">Open tasks</div><div class="v num">${openTasks}</div><div class="d">1 overdue</div></div>
+    <div class="tile"><div class="k">Open tasks</div><div class="v num">${S.tasks.length}</div><div class="d">1 overdue</div></div>
     <div class="tile"><div class="k">Last notification reach</div><div class="v num" id="ackTile">${lastComm.ack}%</div><div class="d">acknowledged · AlertMedia</div></div>
   </div>
 
@@ -430,17 +548,6 @@ function home(){
 
   <div class="grid home-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
     <div class="card">
-      <div class="card-h">${ico('M12 3v2M5.6 5.6l1.4 1.4M3 12h2M12 21a7 7 0 007-7H5a7 7 0 007 7zM18.4 5.6L17 7M21 12h-2')}Daily security brief</div>
-      <div class="card-b">
-        <ul class="brief">
-          <li>Overnight intrusion alert at Miami DC resolved as no-breach; camera 11 realignment pending.</li>
-          <li>Tropical storm watch covers both Florida sites — SOP-11 readiness checks due within 24h.</li>
-          <li>Friday demonstration near NYC HQ: readiness plan task open, screening posture decision needed.</li>
-        </ul>
-        <button class="btn sm" style="margin-top:10px" onclick="toggleDrawer(true);seedChat('Brief me on everything happening right now.')">Ask Black Palm to brief me</button>
-      </div>
-    </div>
-    <div class="card">
       <div class="card-h">${ico('M2 6h13v12H2zM15 10l7-4v12l-7-4')}Video intelligence<span class="act" onclick="go('video')">All cameras</span></div>
       <div class="card-b">
         <div class="camgrid" style="grid-template-columns:1fr 1fr" id="homeCams">
@@ -453,25 +560,23 @@ function home(){
       <div class="card-h">${ico('M4 4h16v11H8l-4 4V4zM8 8h8M8 11h5')}Communications<span class="act" onclick="go('comms')">History</span></div>
       <div class="card-b" id="commPanel">${commCard(S.comms[0])}</div>
     </div>
-  </div>
-
-  <div class="grid home-grid" style="grid-template-columns:1.35fr 1fr">
-    <div class="card">
-      <div class="card-h">${ico('M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5')}Incidents and tasks<span class="act" onclick="go('incidents')">Manage</span></div>
-      <table>
-        <tr><th>Item</th><th>Facility / due</th><th style="text-align:right">Status</th></tr>
-        ${S.incidents.map(i=>`<tr class="rowlink" onclick="go('incidents')"><td><span class="num" style="color:var(--t3)">${i.id}</span> ${i.title}</td><td style="color:var(--t2)">${i.fac}</td><td style="text-align:right"><span class="pill ${i.status==='Active'?(i.critical?'bad':'warn'):'mut'}">${i.status}</span></td></tr>`).join('')}
-        ${S.tasks.map(t=>`<tr><td>${t.t}</td><td style="color:var(--t2)">${t.due}</td><td style="text-align:right"><span class="pill ${t.st}">${t.st==='bad'?'Overdue':t.st==='warn'?'Due today':'Open'}</span></td></tr>`).join('')}
-      </table>
-    </div>
     <div class="card">
       <div class="card-h">${ico('M22 20H2M4 20V9M10 20V4M16 20v-7')}Response trend<span class="act" onclick="go('reports')">Reports</span></div>
       <div class="card-b">
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2)"><span>Median time-to-acknowledge, last 8 weeks</span><span class="num" style="color:var(--ok)">−23%</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2)"><span>Median time-to-acknowledge, 8 wks</span><span class="num" style="color:var(--ok)">−23%</span></div>
         <div class="sparkbars" id="spark1"></div>
         <div style="font-size:11.5px;color:var(--t3);margin-top:8px">Captured automatically from incident + AlertMedia activity</div>
       </div>
     </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">${ico('M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5')}Incidents and tasks<span class="act" onclick="go('incidents')">Manage</span></div>
+    <table>
+      <tr><th>Item</th><th>Facility / due</th><th style="text-align:right">Status</th></tr>
+      ${S.incidents.map(i=>`<tr class="rowlink" onclick="go('incidents')"><td><span class="num" style="color:var(--t3)">${i.id}</span> ${i.title}</td><td style="color:var(--t2)">${i.fac}</td><td style="text-align:right"><span class="pill ${i.status==='Active'?(i.critical?'bad':'warn'):'mut'}">${i.status}</span></td></tr>`).join('')}
+      ${S.tasks.map(t=>`<tr><td>${t.t}</td><td style="color:var(--t2)">${t.due}</td><td style="text-align:right"><span class="pill ${t.st}">${t.st==='bad'?'Overdue':t.st==='warn'?'Due today':'Open'}</span></td></tr>`).join('')}
+    </table>
   </div>`;
 }
 
@@ -602,6 +707,73 @@ function cyber(){
   </div>`;
 }
 
+function knowledge(){
+  return `
+  <div class="notice"><b>Customer knowledge base.</b> Sterling Financial's own SOPs, plans, policies and playbooks live here. Ask Black Palm cites these documents by name when answering — guidance comes from the customer's doctrine, not generic AI.</div>
+  <div class="card">
+    <div class="card-h">${ico('M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z')}Knowledge library · ${KDOCS.length} documents<span class="act" onclick="alert('Demo: production supports upload, versioning and role-based access per document.')">Upload document</span></div>
+    <table>
+      <tr><th>Document</th><th>Type</th><th>Scope</th><th>Version</th><th style="text-align:right">Status</th></tr>
+      ${KDOCS.map(d=>`<tr class="rowlink" onclick="toggleDrawer(true);seedChat('Summarize the document: ${d[0].replace(/'/g,'')}')"><td>${d[0]}</td><td style="color:var(--t2)">${d[1]}</td><td style="color:var(--t2)">${d[2]}</td><td style="color:var(--t3)">${d[3]}</td><td style="text-align:right"><span class="pill ${d[4]==='Current'?'ok':d[4]==='Review due'?'warn':'mut'}">${d[4]}</span></td></tr>`).join('')}
+    </table>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-h">${ico('M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z')}Try it with Ask Black Palm</div>
+    <div class="card-b"><div class="chips" style="justify-content:flex-start;margin:0">
+      <button onclick="toggleDrawer(true);seedChat('Pull our armed visitor SOP.')">Pull our armed visitor SOP</button>
+      <button onclick="toggleDrawer(true);seedChat('What does our policy say about demonstrations near a facility?')">What does our policy say about demonstrations?</button>
+      <button onclick="toggleDrawer(true);seedChat('According to our Miami playbook, what is the next step after a perimeter intrusion?')">Next step per the Miami playbook</button>
+    </div></div>
+  </div>`;
+}
+
+function admin(){
+  const users=[
+    ['D. Marsh','Security Director','Enterprise','Active now'],
+    ['J. Okafor','SOC Operator','Enterprise','Active now'],
+    ['R. Alvarez','Facility Security Manager','Miami Data Center','2h ago'],
+    ['T. Boone','Investigator','Northeast Region','Yesterday'],
+    ['K. Whitman','Executive (read-only)','Enterprise','3d ago'],
+    ['S. Patel','Administrator','Enterprise','Yesterday'],
+  ];
+  const roles=[
+    ['Security Director','Full operational control · approve actions · change posture'],
+    ['SOC Operator','Monitor · open incidents · dispatch · draft notifications'],
+    ['Investigator','Case access · forensic search · sensitive investigations'],
+    ['Facility Security Manager','Facility-scoped incidents, cameras, tasks'],
+    ['Executive','Read-only posture, briefs and reports'],
+    ['Administrator','Users, groups, permissions, connectors, knowledge library'],
+  ];
+  const groups=[['Corporate Security','12'],['Northeast Region','8'],['Miami Operations','9'],['Investigations','4'],['Executive Leadership','5']];
+  return `
+  <div class="notice"><b>Role-based control.</b> Permissions govern who can view, edit, approve and execute — sending notifications, opening incidents, changing posture, or accessing investigations and cyber. Every action lands in the audit trail below.</div>
+  <div class="split">
+    <div class="card">
+      <div class="card-h">${ico('M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8')}Users<span class="act" onclick="alert('Demo: production supports SSO/SCIM provisioning.')">Invite user</span></div>
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Scope</th><th style="text-align:right">Last active</th></tr>
+        ${users.map(u=>`<tr><td>${u[0]}</td><td style="color:var(--t2)">${u[1]}</td><td style="color:var(--t2)">${u[2]}</td><td style="text-align:right;color:var(--t3)">${u[3]}</td></tr>`).join('')}
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-h">${ico('M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z')}Roles and groups</div>
+      <table>
+        <tr><th>Role</th><th style="text-align:right">Permissions</th></tr>
+        ${roles.map(r=>`<tr><td style="white-space:nowrap">${r[0]}</td><td style="text-align:right;color:var(--t3);font-size:12px">${r[1]}</td></tr>`).join('')}
+        <tr><th>Group</th><th style="text-align:right">Members</th></tr>
+        ${groups.map(g=>`<tr><td>${g[0]}</td><td style="text-align:right"><span class="num" style="color:var(--t2)">${g[1]}</span></td></tr>`).join('')}
+      </table>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-h">${ico('M12 8v4l3 3M12 2a10 10 0 100 20 10 10 0 000-20z')}Audit trail<span style="color:var(--t3);font-size:11.5px;margin-left:6px">who did what, when — captured automatically</span></div>
+    <table>
+      <tr><th style="width:110px">Time</th><th style="width:140px">User</th><th>Action</th></tr>
+      ${S.audit.map(a=>`<tr><td class="num" style="color:var(--t3)">${a.t}</td><td style="color:var(--t2)">${a.u}</td><td>${a.a}</td></tr>`).join('')}
+    </table>
+  </div>`;
+}
+
 function reports(){
   return `
   <div class="kpis" style="margin-bottom:14px">
@@ -644,6 +816,7 @@ function seedChat(q){$('chatInput').value=q; sendChat();}
 function liveStateSummary(){
   return JSON.stringify({
     posture:S.posture,
+    postureReason:S.postureReason,
     facilities:S.facilities.map(f=>({name:f.name,status:f.status})),
     priorityEvents:S.events.map(e=>e.t),
     activeIncidents:S.incidents.map(i=>({id:i.id,title:i.title,status:i.status,timeline:i.timeline})),
@@ -666,6 +839,9 @@ ${SOPS['severe-weather']}
 
 ${SOPS['demonstration']}
 
+CUSTOMER KNOWLEDGE LIBRARY (documents on file): ${KDOCS.map(d=>d[0]).join('; ')}. The three SOPs above are excerpted in full; other documents are on file but not excerpted.
+When an answer draws on customer doctrine, cite the document by name, e.g. "According to your Miami DC perimeter intrusion playbook, the next required step is…". If asked about a non-excerpted document, describe its purpose and role rather than inventing contents.
+
 LIVE OPERATIONAL STATE (JSON): ${liveStateSummary()}
 
 Rules: Be concise (under 140 words), operational, and calm. Reference SOP numbers when relevant. Recommend concrete next actions. Never claim to predict criminal behavior — frame forward-looking analysis as anticipatory decision support. Plain text only, no markdown headers; short paragraphs or dash lists.`;
@@ -686,6 +862,10 @@ Rules: Be concise (under 140 words), operational, and calm. Reference SOP number
 
 function fallbackAnswer(q){
   const l=q.toLowerCase();
+  if(l.includes('why')&&l.includes('posture')||l.includes('why are we'))return `Posture is <b>${S.posture}</b>. ${S.postureReason} Contributing factors carry different weights: an unresolved perimeter event, an active weather watch, and open corrective actions. Posture recommendations are advisory — changes require Security Director approval.`;
+  if(l.includes('attention'))return `Three items need attention: the Miami perimeter event (INC-0142) awaiting closure review, SOP-11 weather readiness checks for both Florida sites, and the overdue Q3 access badge audit. I can open any of these or draft the related notification.`;
+  if(l.includes('sop')||l.includes('armed'))return `<b>SOP-7 · Armed visitor / visible weapon response (v3.1)</b>\nKey steps: do not confront — maintain CCTV visual; notify the on-site lead and Command Center (Code 7); initiate a discreet lobby hold; contact law enforcement with a live description; issue shelter guidance to affected floors (template T-12); preserve video and open an incident record. Full document is in your knowledge library.`;
+  if(l.includes('playbook')||l.includes('perimeter'))return `According to your Miami DC perimeter intrusion playbook, after a detection the next required steps are: operator verification of the camera event, guard dispatch to the fence segment, physical inspection, and a no-breach or breach determination logged to the incident. INC-0142 completed all four; the remaining corrective action is camera 11 realignment.`;
   if(l.includes('brief'))return `Current posture: <b>${S.posture}</b>. ${S.incidents.length} incident record(s) — ${S.incidents.map(i=>i.id+' '+i.status).join(', ')}. Watch items: tropical storm watch for both Florida sites (SOP-11 checks due within 24h) and Friday's permitted demonstration near NYC HQ (SOP-9 — recommend badge-only access during the window). ${S.tasks.length} open tasks, 1 overdue.`;
   if(l.includes('after-action'))return `<b>After-action draft — INC-0143</b>\nSummary: Scylla detected a visible firearm at NYC HQ lobby cam 4. Command Center correlated the event with SOP-7, an incident was opened, security notified, and a shelter-guidance notification (T-12) issued via AlertMedia with live acknowledgment tracking. Response actions were human-approved and captured to the audit trail.\nRecommended corrective actions: confirm lobby hold drill cadence; validate camera 4 coverage angle; review acknowledgment gaps by floor.`;
   if(l.includes('weather')||l.includes('storm'))return `SOP-11 applies. Both Florida sites sit in the watch area. Recommended within 24h: verify generator fuel and drainage at Miami DC and Palm Beach Regional, pre-stage AlertMedia templates T-4 and T-5, and confirm the remote-work trigger level with HR.`;
@@ -712,7 +892,8 @@ function runScenario(){
     S.events.unshift({sev:'hi',fresh:true,t:'Weapon detected — visible firearm, New York HQ lobby cam 4',m:'Scylla gun detection · just now · confidence 96%',src:'scylla',act:"go('video')",actLabel:'Open camera'});
     S.facilities.find(f=>f.id==='NYC').status='bad';
     S.cams[0].alerting=true;
-    setPosture('critical');
+    setPosture('critical','Weapon detected at New York HQ lobby — SOP-7 response in progress. Miami perimeter review and Florida storm watch remain active.');
+    S.audit.unshift({t:now(),u:'System (Scylla)',a:'Weapon detection event, NYC HQ lobby cam 4 — enterprise posture escalated to Critical'});
     toast('Weapon detected — NYC HQ','Scylla gun detection, lobby cam 4. Ask Black Palm is correlating…');
     renderScreen();
   },600);
@@ -754,6 +935,7 @@ function actIncident(btn){
   S.incidents.unshift({id:'INC-0143',critical:true,title:'Weapon detection response — NYC HQ lobby',fac:'New York HQ',status:'Active',owner:'D. Marsh',opened:now(),
     timeline:[{t:now(),e:'Scylla gun detection, lobby cam 4 (Event auto-attached)'},{t:now(),e:'Incident created from Ask Black Palm recommendation — approved by D. Marsh'},{t:now(),e:'SOP-7 armed visitor response attached'}]});
   addMsg('sys','Incident INC-0143 created · SOP-7 attached · audit trail started');
+  S.audit.unshift({t:now(),u:'D. Marsh',a:'Approved incident creation INC-0143 from Ask Black Palm recommendation'});
   renderNav();
 }
 
@@ -762,6 +944,7 @@ function actNotify(btn){
   const inc=S.incidents.find(i=>i.id==='INC-0143');
   if(inc)inc.timeline.push({t:now(),e:'Security team — enterprise group (41) notified, Code 7'});
   addMsg('sys','Security team — enterprise (41 members) notified via AlertMedia · Code 7');
+  S.audit.unshift({t:now(),u:'D. Marsh',a:'Notified Security team — enterprise (41) via AlertMedia · Code 7'});
 }
 
 /* ---- AlertMedia composer ---- */
@@ -793,6 +976,7 @@ function sendAlert(){
   const inc=S.incidents.find(i=>i.id==='INC-0143');
   if(inc)inc.timeline.push({t:now(),e:'Employee notification T-12 sent via AlertMedia — 274 recipients, acknowledgment tracking live'});
   addMsg('sys','Notification sent via AlertMedia · tracking acknowledgments live');
+  S.audit.unshift({t:now(),u:'D. Marsh',a:'Sent AlertMedia notification T-12 — NYC HQ All Staff (274 recipients)'});
   if(S.screen==='home')renderScreen();
   let tick=0;
   S.ackTimer=setInterval(()=>{

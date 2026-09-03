@@ -12,8 +12,12 @@ Open `index.html` in any browser (or via GitHub Pages if enabled).
 2. Watch the full loop: Scylla detection → posture change → Ask Black Palm
    correlates and recommends → create incident → draft AlertMedia notification →
    live acknowledgment tracking → after-action draft.
-3. Explore the other screens: Intelligence, Operating Picture, Incidents, Video,
-   Communications, Cyber (reserved module), Reports.
+3. Explore the other screens: Intelligence, Common Operating Picture, Incidents,
+   Video, Communications, Knowledge Library, Cyber (reserved module), Reports,
+   and Administration (users, roles, groups and a live audit trail).
+4. Note the decision layer on Home: enterprise posture with the "why" behind it,
+   plus Recommended Attention items with one-click actions.
+5. Try it on a phone — the layout is fully responsive.
 
 ## Notes
 
